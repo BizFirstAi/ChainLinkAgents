@@ -32,7 +32,7 @@ No operation on this node holds a wallet or signs a transaction — actually sen
 
 This node covers **CCIP only**. Chainlink Data Feeds are out of scope (delegated to the Ethereum ExecutionNode's
 generic contract-call path + Standards Registry); VRF, Automation, and Functions are not implemented by any node
-in this codebase. See [Roadmap](https://bizfirstai.github.io/ChainLinkAgents/guide/10-roadmap.html).
+in this codebase. See [Roadmap](https://docs.bizfirstai.com/Nodes/ChainLink/10-roadmap.html).
 
 ## Source Code
 
@@ -45,23 +45,13 @@ platform, no code or namespace changes:
 
 ## Documentation
 
-| Page | Published URL |
-|---|---|
-| Operation reference | https://bizfirstai.github.io/ChainLinkAgents/ |
-| Guide: Overview | https://bizfirstai.github.io/ChainLinkAgents/guide/ |
-| Guide: Configuration | https://bizfirstai.github.io/ChainLinkAgents/guide/01-configuration.html |
-| Guide: Networks | https://bizfirstai.github.io/ChainLinkAgents/guide/02-networks.html |
-| Guide: Message Operations | https://bizfirstai.github.io/ChainLinkAgents/guide/03-message-operations.html |
-| Guide: Router Operations | https://bizfirstai.github.io/ChainLinkAgents/guide/04-router-operations.html |
-| Guide: Lane Operations | https://bizfirstai.github.io/ChainLinkAgents/guide/05-lane-operations.html |
-| Guide: CCIP Concepts | https://bizfirstai.github.io/ChainLinkAgents/guide/06-ccip-concepts.html |
-| Guide: Input & Output | https://bizfirstai.github.io/ChainLinkAgents/guide/07-input-output.html |
-| Guide: Examples | https://bizfirstai.github.io/ChainLinkAgents/guide/08-examples.html |
-| Guide: Troubleshooting | https://bizfirstai.github.io/ChainLinkAgents/guide/09-troubleshooting.html |
-| Guide: Roadmap | https://bizfirstai.github.io/ChainLinkAgents/guide/10-roadmap.html |
+- **This site:** [chainlink.bizfirstai.com](https://chainlink.bizfirstai.com) — quick reference and links
+- **Full guide (11 pages):** [docs.bizfirstai.com/Nodes/ChainLink](https://docs.bizfirstai.com/Nodes/ChainLink/) —
+  configuration, networks, every resource's operations, CCIP concepts, examples, troubleshooting
+- **Full developer portal:** [docs.bizfirstai.com](https://docs.bizfirstai.com)
 
-Same guide, also published in the portal: [bizfirstai.github.io/UserGuides/Nodes/ChainLink](https://bizfirstai.github.io/UserGuides/Nodes/ChainLink/)
-Full developer portal: [docs.bizfirstai.com](https://docs.bizfirstai.com)
+All BizFirst.Ai node documentation is maintained in one place — the
+[UserGuides](https://github.com/BizFirstAi/UserGuides) portal — rather than duplicated per repo.
 
 ## Project layout
 
@@ -70,6 +60,9 @@ src/
 ├── BizFirst.Integration.Chainlink.Domain             # Result records + shared value types (zero deps)
 ├── BizFirst.Integration.Chainlink.Services            # CCIP API v2 client, ABI encoder, on-chain reader, resource services
 └── BizFirst.Ai.ExecutionNodes.Blockchain.ChainLink     # Executor: routing, config, operation DTOs
+docs/
+├── index.html  # This site's homepage — quick reference, links out to the full guide
+└── CNAME       # chainlink.bizfirstai.com
 ```
 
 Targets **.NET 9**. The `Tests` project (unit/regression tests, 44 tests as of the last review pass) is part of
@@ -117,7 +110,7 @@ their node-plugin bootstrap (`Plugins_RegisterAllNodes()` in `ServiceCollectionE
 - Two originally-designed operations (get message by transaction, list messages by address) were cut — no real
   CCIP API endpoint was found to back either.
 
-See [Roadmap](https://bizfirstai.github.io/ChainLinkAgents/guide/10-roadmap.html) for full detail.
+See [Roadmap](https://docs.bizfirstai.com/Nodes/ChainLink/10-roadmap.html) for full detail.
 
 ## About BizFirst.Ai
 

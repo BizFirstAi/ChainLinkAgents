@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ChainLinkAgents — BizFirst.Ai Community Node</title>
+<link rel="stylesheet" href="https://docs.bizfirstai.com/styles.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+.bfai-topbar-logo img{height:26px;display:block;}.bfai-topbar{position:fixed;top:0;left:0;right:0;z-index:200;background:#1e2736;border-bottom:1px solid #2d3a4a;height:40px;display:flex;align-items:center;padding:0 20px;}
+.bfai-topbar-right{margin-left:auto;display:flex;gap:6px;}
+.bfai-topbar-right a{font-size:12px;color:#b0c4d8;text-decoration:none;padding:4px 12px;border-radius:5px;display:flex;align-items:center;gap:6px;transition:background 0.15s,color 0.15s;}
+.bfai-topbar-right a:hover{background:rgba(255,255,255,0.08);color:#fff;}
+body{padding-top:40px;}
+main{margin-left:0;max-width:960px;padding:40px 32px;}
+.hero{text-align:center;padding:32px 0 8px;}
+.hero img{height:48px;margin-bottom:16px;}
+.hero h1{font-size:2.2rem;margin:0 0 8px;}
+.hero p.subtitle{font-size:1.1rem;max-width:640px;margin:0 auto;}
+</style>
+</head>
+<body>
+
+<div class="bfai-topbar">
+  <a href="https://bizfirstai.com" target="_blank" class="bfai-topbar-logo">
+    <img src="https://www.bizfirstai.com/website/assets/Logo/logo.png" alt="BizFirstAI">
+  </a>
+  <div class="bfai-topbar-right">
+    <a href="https://docs.bizfirstai.com/" target="_top"><i class="fa-solid fa-house"></i> Portal</a>
+    <a href="https://community.bizfirstai.com" target="_blank"><i class="fa-solid fa-people-group"></i> Community</a>
+    <a href="https://github.com/BizFirstAi/ChainLinkAgents" target="_blank"><i class="fa-brands fa-github"></i> GitHub</a>
+  </div>
+</div>
+
+<main>
+  <div class="hero">
+    <img src="https://www.bizfirstai.com/website/assets/Logo/logo.png" alt="BizFirstAI">
+    <h1>ChainLinkAgents</h1>
+    <p class="subtitle">Chainlink CCIP community node for BizFirst.Ai — build cross-chain messages, track their delivery, and read Router/Lane state as workflow steps.</p>
+  </div>
+
+  <div class="callout info">
+    <strong>What it does:</strong> The Chainlink node (<code>chainlink</code>) wraps Chainlink's
+    <strong>CCIP (Cross-Chain Interoperability Protocol)</strong> as BizFirst.Ai workflow
+    operations across three resources — <code>message</code>, <code>router</code>, and
+    <code>lane</code> — 11 operations in total. This is CCIP only, not Chainlink Data Feeds. No
+    operation holds a wallet or signs a transaction — sending a built message
+    (<code>ccipSend(...)</code>) is a separate step on the Ethereum ExecutionNode.
+  </div>
+
+  <h2>Get Started</h2>
+  <div class="card-grid">
+    <a class="card" href="https://docs.bizfirstai.com/Nodes/ChainLink/">
+      <div class="card-icon"><i class="fa-solid fa-book"></i></div>
+      <h3>Full Guide</h3>
+      <p>11-page reference — configuration, networks, every resource's operations, CCIP concepts, examples, troubleshooting.</p>
+    </a>
+    <a class="card" href="../src/">
+      <div class="card-icon"><i class="fa-solid fa-code"></i></div>
+      <h3>Source Code</h3>
+      <p>Browse the full C# implementation — Domain, Services, and Executor projects.</p>
+    </a>
+    <a class="card" href="https://github.com/BizFirstAi/ChainLinkAgents">
+      <div class="card-icon"><i class="fa-brands fa-github"></i></div>
+      <h3>GitHub Repo</h3>
+      <p>Star it, file an issue, or open a PR.</p>
+    </a>
+  </div>
+
+  <h2>Operations at a Glance</h2>
+  <table>
+    <thead><tr><th>Resource</th><th>Operations</th></tr></thead>
+    <tbody>
+      <tr><td><code>message</code></td><td><code>build</code>, <code>getStatus</code>, <code>checkManualExecutionRequired</code>, <code>getTokenTransferRateLimit</code></td></tr>
+      <tr><td><code>router</code></td><td><code>getAddress</code>, <code>isChainSupported</code>, <code>getFee</code>, <code>convertChainSelector</code></td></tr>
+      <tr><td><code>lane</code></td><td><code>getSupportedLanes</code>, <code>getLatency</code>, <code>getRiskManagementStatus</code></td></tr>
+    </tbody>
+  </table>
+  <p>Full field-by-field reference for every operation: see the <a href="https://docs.bizfirstai.com/Nodes/ChainLink/">Full Guide</a>.</p>
+
+  <div class="callout warning">
+    <strong>Only two operations need an RPC URL:</strong> <code>router/isChainSupported</code> and
+    <code>router/getFee</code> make a real, independent on-chain read and require
+    <code>Chainlink:NetworkRpcUrls:{network}</code> to be configured. Every other operation is
+    either pure local computation (<code>message/build</code>) or calls the free, public CCIP API
+    v2 (<code>api.ccip.chain.link/v2</code>) — no wallet, signing key, or SDK required anywhere.
+  </div>
+
+  <h2>Configuration &amp; Networks</h2>
+  <p><code>Chainlink:BaseUrl</code> defaults to the real public CCIP API and rarely needs
+  overriding. <code>Chainlink:NetworkRpcUrls</code> is required only for the two on-chain-read
+  operations above. The bundled per-network reference table covers
+  <code>ethereum-mainnet</code>, <code>arbitrum-mainnet</code>, and <code>base-mainnet</code> —
+  only Ethereum mainnet's chain selector is independently confirmed; the other selectors and all
+  three Router contract addresses are placeholders pending a live CCIP Directory pull. An optional
+  CCIP API key (an <code>API_KEY</code>-type vault credential) raises rate-limit headroom but
+  isn't required for any implemented operation.</p>
+
+  <h2>Roadmap</h2>
+  <p><code>checkManualExecutionRequired</code> only reports eligibility today — actually
+  submitting a manual execution needs a confirmed authorization/calldata shape.
+  <code>getTokenTransferRateLimit</code> returns a prepared call descriptor rather than a resolved
+  value, since no on-chain rate-limiter ABI was confirmed during design review. Live CCIP
+  Directory integration (replacing the static reference table) is also planned. Two
+  originally-designed operations — get message by transaction, list messages by address — were
+  cut entirely, as no real CCIP API endpoint was found to back either.</p>
+
+  <h2>About BizFirst.Ai</h2>
+  <p><a href="https://bizfirstai.com">BizFirst.Ai</a> is a workflow automation platform for
+  building AI-driven business processes. This node is one of many community connectors that
+  plug into its ProcessEngine — browse the full node catalogue and developer guides at
+  <a href="https://docs.bizfirstai.com">docs.bizfirstai.com</a>, or join the discussion at
+  <a href="https://community.bizfirstai.com">community.bizfirstai.com</a>.</p>
+
+</main>
+</body>
+</html>
