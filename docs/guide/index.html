@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chainlink — BizFirstAI Node Reference</title>
+<link rel="stylesheet" href="https://bizfirstai.github.io/UserGuides/styles.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+.bfai-topbar-logo img{height:26px;display:block;}.bfai-topbar{position:fixed;top:0;left:0;right:0;z-index:200;background:#1e2736;border-bottom:1px solid #2d3a4a;height:40px;display:flex;align-items:center;padding:0 20px;}
+.bfai-topbar-right{margin-left:auto;display:flex;gap:6px;}
+.bfai-topbar-right a{font-size:12px;color:#b0c4d8;text-decoration:none;padding:4px 12px;border-radius:5px;display:flex;align-items:center;gap:6px;transition:background 0.15s,color 0.15s;}
+.bfai-topbar-right a:hover{background:rgba(255,255,255,0.08);color:#fff;}
+body{padding-top:40px;}
+nav.sidebar{top:40px;height:calc(100vh - 40px);}
+</style>
+</head>
+<body>
+
+<div class="bfai-topbar">
+  <a href="https://bizfirstai.com" target="_blank" class="bfai-topbar-logo">
+    <img src="https://www.bizfirstai.com/website/assets/Logo/logo.png" alt="BizFirstAI">
+  </a>
+  <div class="bfai-topbar-right">
+    <a href="https://bizfirstai.github.io/UserGuides/" target="_top"><i class="fa-solid fa-house"></i> Portal</a>
+    <a href="https://community.bizfirstai.com" target="_blank"><i class="fa-solid fa-people-group"></i> Community</a>
+  </div>
+</div>
+
+<nav class="sidebar">
+  <div class="sidebar-brand">Chainlink<span>Node Reference</span></div>
+  <div class="sidebar-section">This Node</div>
+  <a href="index.html" class="active">Overview</a>
+  <a href="01-configuration.html">Configuration</a>
+  <a href="02-networks.html">Networks</a>
+  <a href="03-message-operations.html">Message Operations</a>
+  <a href="04-router-operations.html">Router Operations</a>
+  <a href="05-lane-operations.html">Lane Operations</a>
+  <a href="06-ccip-concepts.html">CCIP Concepts</a>
+  <a href="07-input-output.html">Input &amp; Output</a>
+  <a href="08-examples.html">Examples</a>
+  <a href="09-troubleshooting.html">Troubleshooting</a>
+  <a href="10-roadmap.html">Roadmap</a>
+  <div class="sidebar-section">Navigation</div>
+  <a href="https://bizfirstai.github.io/UserGuides/Nodes/">&#8592; All Nodes</a>
+  <a href="https://bizfirstai.github.io/UserGuides/">&#8592; Portal</a>
+</nav>
+
+<main>
+  <div class="page-header">
+    <div class="breadcrumb">
+      <a href="https://bizfirstai.github.io/UserGuides/" style="color:inherit;text-decoration:none;">BizFirstAI Portal</a> /
+      <a href="https://bizfirstai.github.io/UserGuides/Nodes/" style="color:inherit;text-decoration:none;">Nodes</a> /
+      Chainlink
+    </div>
+    <h1>Chainlink</h1>
+    <p class="subtitle">Build, track, and inspect Chainlink CCIP cross-chain messages — against the real CCIP API v2 and a minimal, independent on-chain read path</p>
+  </div>
+
+  <div class="callout info">
+    <strong>What it does:</strong> The Chainlink node (<code>chainlink</code>) exposes Chainlink's <strong>CCIP (Cross-Chain Interoperability Protocol)</strong> as workflow steps — building the ABI-encoded cross-chain message a sender contract needs, tracking a sent message's delivery status, reading Router contract state, and checking Lane/Risk Management Network health. This node does not itself hold a wallet or sign anything: message <em>sending</em> is delegated to the Ethereum ExecutionNode's contract-call step once this node has built the message.
+  </div>
+
+  <h2>Quick Start</h2>
+  <ol>
+    <li>Add a <strong>Chainlink</strong> node to your workflow</li>
+    <li>Set <code>resource</code> to <code>message</code> and <code>operation</code> to <code>getStatus</code></li>
+    <li>Enter a <code>messageId</code> (the CCIP message ID returned once a message was actually sent on-chain)</li>
+    <li>Run the workflow — the node returns the message's <code>executionState</code> (<code>UNTOUCHED</code> / <code>IN_PROGRESS</code> / <code>SUCCESS</code> / <code>FAILURE</code>) plus source/destination network info</li>
+  </ol>
+
+  <div class="callout success">
+    <strong>Tip:</strong> Every operation shares the same two config keys — <code>resource</code> and
+    <code>operation</code> — plus a small set of operation-specific fields. Learn the shared pattern once on
+    <a href="07-input-output.html">Input &amp; Output</a>, and read <a href="06-ccip-concepts.html">CCIP Concepts</a>
+    before using <code>message/build</code> or <code>router/getFee</code> for the first time.
+  </div>
+
+  <h2>Pages in This Guide</h2>
+  <div class="card-grid">
+    <a class="card" href="01-configuration.html">
+      <div class="card-icon"><i class="fa-solid fa-sliders"></i></div>
+      <h3>Configuration</h3>
+      <p>appsettings.json, the optional CCIP API key, and RPC URLs for on-chain reads.</p>
+    </a>
+    <a class="card" href="02-networks.html">
+      <div class="card-icon"><i class="fa-solid fa-globe"></i></div>
+      <h3>Networks</h3>
+      <p>Ethereum, Arbitrum, Base — Router addresses and chain selectors.</p>
+    </a>
+    <a class="card" href="03-message-operations.html">
+      <div class="card-icon"><i class="fa-solid fa-paper-plane"></i></div>
+      <h3>Message Operations</h3>
+      <p>build, getStatus, checkManualExecutionRequired, getTokenTransferRateLimit.</p>
+    </a>
+    <a class="card" href="04-router-operations.html">
+      <div class="card-icon"><i class="fa-solid fa-route"></i></div>
+      <h3>Router Operations</h3>
+      <p>getAddress, isChainSupported, getFee, convertChainSelector.</p>
+    </a>
+    <a class="card" href="05-lane-operations.html">
+      <div class="card-icon"><i class="fa-solid fa-signal"></i></div>
+      <h3>Lane Operations</h3>
+      <p>getSupportedLanes, getLatency, getRiskManagementStatus.</p>
+    </a>
+    <a class="card" href="06-ccip-concepts.html">
+      <div class="card-icon"><i class="fa-solid fa-diagram-project"></i></div>
+      <h3>CCIP Concepts</h3>
+      <p>EVM2AnyMessage, extraArgs versions, fee tokens, chain selectors.</p>
+    </a>
+    <a class="card" href="07-input-output.html">
+      <div class="card-icon"><i class="fa-solid fa-right-left"></i></div>
+      <h3>Input &amp; Output</h3>
+      <p>The shared config-key pattern and how errors surface.</p>
+    </a>
+    <a class="card" href="08-examples.html">
+      <div class="card-icon"><i class="fa-solid fa-flask"></i></div>
+      <h3>Examples</h3>
+      <p>Worked workflow patterns using this node.</p>
+    </a>
+    <a class="card" href="09-troubleshooting.html">
+      <div class="card-icon"><i class="fa-solid fa-wrench"></i></div>
+      <h3>Troubleshooting</h3>
+      <p>Common errors and how to fix them.</p>
+    </a>
+    <a class="card" href="10-roadmap.html">
+      <div class="card-icon"><i class="fa-solid fa-road"></i></div>
+      <h3>Roadmap</h3>
+      <p>What was cut, what's unconfirmed, and what's explicitly out of scope.</p>
+    </a>
+  </div>
+
+  <h2>Core Concepts</h2>
+  <h3>CCIP, Not Data Feeds</h3>
+  <p>Chainlink ships several distinct products — Data Feeds, CCIP, VRF, Automation, Functions. This node covers
+  <strong>only CCIP</strong> (cross-chain messaging). Data Feeds (price feeds) are out of scope for this node —
+  they're reached via the Ethereum ExecutionNode's generic contract-call step plus the Standards Registry instead.
+  VRF, Automation, and Functions are not implemented by any node in this codebase yet. See
+  <a href="10-roadmap.html">Roadmap</a>.</p>
+
+  <h3>Resources</h3>
+  <p>Operations are grouped by resource, matching CCIP's own architecture:</p>
+  <ul>
+    <li><strong>message</strong> — build a cross-chain message, then track its delivery status</li>
+    <li><strong>router</strong> — read the on-chain Router contract: addresses, chain support, fees, chain-selector conversion</li>
+    <li><strong>lane</strong> — CCIP lane (source→destination pair) discovery, latency, and Risk Management Network status</li>
+  </ul>
+
+  <h3>Two Mechanisms, One Node</h3>
+  <p>Operations on this node use one of three different mechanisms — each operation's page says which:</p>
+  <ul>
+    <li><strong>Local computation</strong> — <code>message/build</code> does pure ABI encoding with no network call at all.</li>
+    <li><strong>CCIP API v2 HTTP calls</strong> — <code>message/getStatus</code>, <code>lane/getSupportedLanes</code>, <code>lane/getLatency</code>, <code>lane/getRiskManagementStatus</code> call <code>api.ccip.chain.link/v2</code>.</li>
+    <li><strong>Real on-chain reads</strong> — <code>router/isChainSupported</code> and <code>router/getFee</code> make a real <code>eth_call</code> against the Router contract via a minimal, independent Nethereum client (requires an RPC URL — see <a href="01-configuration.html">Configuration</a>).</li>
+  </ul>
+
+  <div class="callout warning">
+    <strong>No wallet, no signing:</strong> Nothing on this node holds a private key or sends a transaction.
+    <code>message/build</code> prepares the message; actually calling <code>ccipSend(...)</code> on-chain is a
+    separate step performed by the Ethereum ExecutionNode's own contract-write operation, using the output of
+    <code>message/build</code> as its input.
+  </div>
+
+  <h2>Operation Summary</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Resource</th>
+        <th>Operation</th>
+        <th>Guide Page</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><code>message</code></td><td><code>build</code>, <code>getStatus</code>, <code>checkManualExecutionRequired</code>, <code>getTokenTransferRateLimit</code></td><td><a href="03-message-operations.html">Message Operations</a></td></tr>
+      <tr><td><code>router</code></td><td><code>getAddress</code>, <code>isChainSupported</code>, <code>getFee</code>, <code>convertChainSelector</code></td><td><a href="04-router-operations.html">Router Operations</a></td></tr>
+      <tr><td><code>lane</code></td><td><code>getSupportedLanes</code>, <code>getLatency</code>, <code>getRiskManagementStatus</code></td><td><a href="05-lane-operations.html">Lane Operations</a></td></tr>
+    </tbody>
+  </table>
+
+</main>
+</body>
+</html>

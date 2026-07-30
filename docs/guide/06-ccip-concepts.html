@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CCIP Concepts | Chainlink — BizFirstAI</title>
+<link rel="stylesheet" href="https://bizfirstai.github.io/UserGuides/styles.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+.bfai-topbar-logo img{height:26px;display:block;}.bfai-topbar{position:fixed;top:0;left:0;right:0;z-index:200;background:#1e2736;border-bottom:1px solid #2d3a4a;height:40px;display:flex;align-items:center;padding:0 20px;}
+.bfai-topbar-right{margin-left:auto;display:flex;gap:6px;}
+.bfai-topbar-right a{font-size:12px;color:#b0c4d8;text-decoration:none;padding:4px 12px;border-radius:5px;display:flex;align-items:center;gap:6px;transition:background 0.15s,color 0.15s;}
+.bfai-topbar-right a:hover{background:rgba(255,255,255,0.08);color:#fff;}
+body{padding-top:40px;}
+nav.sidebar{top:40px;height:calc(100vh - 40px);}
+</style>
+</head>
+<body>
+
+<div class="bfai-topbar">
+  <a href="https://bizfirstai.com" target="_blank" class="bfai-topbar-logo">
+    <img src="https://www.bizfirstai.com/website/assets/Logo/logo.png" alt="BizFirstAI">
+  </a>
+  <div class="bfai-topbar-right">
+    <a href="https://bizfirstai.github.io/UserGuides/" target="_top"><i class="fa-solid fa-house"></i> Portal</a>
+    <a href="https://community.bizfirstai.com" target="_blank"><i class="fa-solid fa-people-group"></i> Community</a>
+  </div>
+</div>
+
+<nav class="sidebar">
+  <div class="sidebar-brand">Chainlink<span>Node Reference</span></div>
+  <div class="sidebar-section">This Node</div>
+  <a href="index.html">Overview</a>
+  <a href="01-configuration.html">Configuration</a>
+  <a href="02-networks.html">Networks</a>
+  <a href="03-message-operations.html">Message Operations</a>
+  <a href="04-router-operations.html">Router Operations</a>
+  <a href="05-lane-operations.html">Lane Operations</a>
+  <a href="06-ccip-concepts.html" class="active">CCIP Concepts</a>
+  <a href="07-input-output.html">Input &amp; Output</a>
+  <a href="08-examples.html">Examples</a>
+  <a href="09-troubleshooting.html">Troubleshooting</a>
+  <a href="10-roadmap.html">Roadmap</a>
+  <div class="sidebar-section">Navigation</div>
+  <a href="https://bizfirstai.github.io/UserGuides/Nodes/">&#8592; All Nodes</a>
+  <a href="https://bizfirstai.github.io/UserGuides/">&#8592; Portal</a>
+</nav>
+
+<main>
+  <div class="page-header">
+    <div class="breadcrumb">
+      <a href="https://bizfirstai.github.io/UserGuides/" style="color:inherit;text-decoration:none;">BizFirstAI Portal</a> /
+      <a href="https://bizfirstai.github.io/UserGuides/Nodes/" style="color:inherit;text-decoration:none;">Nodes</a> /
+      <a href="index.html">Chainlink</a> /
+      CCIP Concepts
+    </div>
+    <h1>CCIP Concepts</h1>
+    <p class="subtitle">EVM2AnyMessage, extraArgs versions, fee tokens, and chain selectors — read this before using build or getFee</p>
+  </div>
+
+  <h2>The EVM2AnyMessage Tuple</h2>
+  <p>Every CCIP message is, on-chain, a Solidity struct called <code>Client.EVM2AnyMessage</code>:
+  receiver address, arbitrary data payload, an array of token transfers, a fee token, and
+  <code>extraArgs</code>. <code>message/build</code> and <code>router/getFee</code> both assemble this same
+  tuple from the same input fields — that's why their field lists overlap almost completely (see
+  <a href="03-message-operations.html">Message Operations</a> and
+  <a href="04-router-operations.html">Router Operations</a>).</p>
+
+  <div class="callout info">
+    <strong>Output shape — a JSON array of raw values, not a single encoded blob.</strong>
+    <code>message/build</code>'s <code>encodedMessage</code> output is a JSON array of the tuple's raw
+    positional values (receiver/data/tokenAmounts/feeToken/extraArgs), not one pre-<code>abi.encode()</code>'d
+    blob. This is deliberate: the Ethereum ExecutionNode's own contract-write step ABI-encodes a tuple-typed
+    function argument from a nested JSON array of its component values — a single opaque blob wouldn't compose
+    with that delegation path. This is what makes "Chainlink builds the message → Ethereum sends it" work
+    end-to-end as two separate workflow steps.
+  </div>
+
+  <h2>extraArgs: v1 vs. genericV2</h2>
+  <p><code>extraArgs</code> is a 4-byte tag selector followed by ABI-encoded parameters. Two versions are
+  supported, both using Chainlink's own published, fixed tag values:</p>
+  <table>
+    <thead><tr><th>Version</th><th>Tag</th><th>Body</th></tr></thead>
+    <tbody>
+      <tr><td><code>v1</code> (<code>EVMExtraArgsV1</code>)</td><td><code>0x97a657c9</code></td><td><code>abi.encode(uint256 gasLimit)</code></td></tr>
+      <tr><td><code>genericV2</code> (<code>GenericExtraArgsV2</code>, default)</td><td><code>0x181dcf10</code></td><td><code>abi.encode(uint256 gasLimit, bool allowOutOfOrderExecution)</code></td></tr>
+    </tbody>
+  </table>
+  <p>Use <code>genericV2</code> (the default) unless a specific destination lane requires <code>v1</code>.
+  <code>allowOutOfOrderExecution</code> only applies to <code>genericV2</code> and is silently ignored for
+  <code>v1</code>.</p>
+
+  <h2>Fee Tokens: Empty Means Native Gas Token</h2>
+  <p>Leave <code>feeToken</code> empty/omitted to pay the CCIP fee in the destination chain's native gas token
+  — this node encodes that as the zero address (<code>0x0000000000000000000000000000000000000000</code>).
+  <code>router/getFee</code>'s output echoes back this <em>resolved</em> address, not your raw input, so you can
+  always see exactly which token address was actually used for the fee calculation.</p>
+
+  <h2>Addresses Are Validated Before They Reach the ABI Encoder</h2>
+  <p>Every address this node encodes (<code>receiverAddress</code>, <code>feeToken</code>, each
+  <code>tokenAmounts[].token</code>) is validated as exactly <code>0x</code> + 40 hex characters before being
+  passed to Nethereum's ABI encoder. This matters because Nethereum's own encoder does <strong>not</strong>
+  reliably reject a malformed address — a too-short address like <code>0x123</code> is silently accepted with
+  no error, which would otherwise produce a corrupted encoded message instead of a clear failure. See
+  <a href="09-troubleshooting.html">Troubleshooting</a>.</p>
+
+  <h2>Chain Selectors vs. Native Chain IDs</h2>
+  <p>Covered in full on <a href="02-networks.html">Networks</a>: every chain has both a native EVM chain ID and
+  a separate CCIP chain selector, and this node carries both as strings (never numbers) throughout its config
+  and output contract to avoid JavaScript's safe-integer precision loss.</p>
+
+  <h2>Token Amounts Are Strings Too</h2>
+  <p>A <code>tokenAmounts[].amount</code> is a decimal string representing a <code>uint256</code>
+  wei-denominated value — e.g. <code>"1000000000000000000"</code> for 1 token at 18 decimals — never a JSON
+  number, for the same precision reason as chain selectors.</p>
+
+  <h2>This Node Never Sends a Message</h2>
+  <p><code>message/build</code> stops at producing the encoded tuple and <code>extraArgs</code> bytes. Actually
+  calling <code>ccipSend(destinationChainSelector, message)</code> on the source chain's Router contract — the
+  step that assigns the real <code>messageId</code> and moves funds/data — is performed by the Ethereum
+  ExecutionNode's own contract-write operation, using this node's output as its input. This node holds no
+  wallet and signs nothing.</p>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Configuration | Chainlink — BizFirstAI</title>
+<link rel="stylesheet" href="https://bizfirstai.github.io/UserGuides/styles.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+.bfai-topbar-logo img{height:26px;display:block;}.bfai-topbar{position:fixed;top:0;left:0;right:0;z-index:200;background:#1e2736;border-bottom:1px solid #2d3a4a;height:40px;display:flex;align-items:center;padding:0 20px;}
+.bfai-topbar-right{margin-left:auto;display:flex;gap:6px;}
+.bfai-topbar-right a{font-size:12px;color:#b0c4d8;text-decoration:none;padding:4px 12px;border-radius:5px;display:flex;align-items:center;gap:6px;transition:background 0.15s,color 0.15s;}
+.bfai-topbar-right a:hover{background:rgba(255,255,255,0.08);color:#fff;}
+body{padding-top:40px;}
+nav.sidebar{top:40px;height:calc(100vh - 40px);}
+</style>
+</head>
+<body>
+
+<div class="bfai-topbar">
+  <a href="https://bizfirstai.com" target="_blank" class="bfai-topbar-logo">
+    <img src="https://www.bizfirstai.com/website/assets/Logo/logo.png" alt="BizFirstAI">
+  </a>
+  <div class="bfai-topbar-right">
+    <a href="https://bizfirstai.github.io/UserGuides/" target="_top"><i class="fa-solid fa-house"></i> Portal</a>
+    <a href="https://community.bizfirstai.com" target="_blank"><i class="fa-solid fa-people-group"></i> Community</a>
+  </div>
+</div>
+
+<nav class="sidebar">
+  <div class="sidebar-brand">Chainlink<span>Node Reference</span></div>
+  <div class="sidebar-section">This Node</div>
+  <a href="index.html">Overview</a>
+  <a href="01-configuration.html" class="active">Configuration</a>
+  <a href="02-networks.html">Networks</a>
+  <a href="03-message-operations.html">Message Operations</a>
+  <a href="04-router-operations.html">Router Operations</a>
+  <a href="05-lane-operations.html">Lane Operations</a>
+  <a href="06-ccip-concepts.html">CCIP Concepts</a>
+  <a href="07-input-output.html">Input &amp; Output</a>
+  <a href="08-examples.html">Examples</a>
+  <a href="09-troubleshooting.html">Troubleshooting</a>
+  <a href="10-roadmap.html">Roadmap</a>
+  <div class="sidebar-section">Navigation</div>
+  <a href="https://bizfirstai.github.io/UserGuides/Nodes/">&#8592; All Nodes</a>
+  <a href="https://bizfirstai.github.io/UserGuides/">&#8592; Portal</a>
+</nav>
+
+<main>
+  <div class="page-header">
+    <div class="breadcrumb">
+      <a href="https://bizfirstai.github.io/UserGuides/" style="color:inherit;text-decoration:none;">BizFirstAI Portal</a> /
+      <a href="https://bizfirstai.github.io/UserGuides/Nodes/" style="color:inherit;text-decoration:none;">Nodes</a> /
+      <a href="index.html">Chainlink</a> /
+      Configuration
+    </div>
+    <h1>Configuration</h1>
+    <p class="subtitle">appsettings.json, the optional CCIP API key, RPC URLs, and how the node registers itself</p>
+  </div>
+
+  <h2>appsettings.json</h2>
+  <p>The node reads its configuration from a <code>Chainlink</code> section:</p>
+  <pre><code>"Chainlink": {
+  "BaseUrl": "https://api.ccip.chain.link/v2/",
+  "NetworkRpcUrls": {
+    "ethereum-mainnet": "https://your-rpc-provider/...",
+    "arbitrum-mainnet": "https://your-rpc-provider/...",
+    "base-mainnet": "https://your-rpc-provider/..."
+  }
+}</code></pre>
+
+  <table>
+    <thead>
+      <tr><th>Key</th><th>Type</th><th>Required</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>BaseUrl</code></td>
+        <td>text</td>
+        <td>No</td>
+        <td>Base URL for the CCIP API v2. Defaults to the real public <code>https://api.ccip.chain.link/v2/</code> — a stable production endpoint, so most deployments never need to set this.</td>
+      </tr>
+      <tr>
+        <td><code>NetworkRpcUrls</code></td>
+        <td>object</td>
+        <td>Only for <code>router/isChainSupported</code> &amp; <code>router/getFee</code></td>
+        <td>Map of network name → JSON-RPC endpoint URL (e.g. an Alchemy/Infura project URL). Every other operation on this node works with no RPC configuration at all.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout warning">
+    <strong>No bundled RPC default:</strong> Unlike the CCIP API's own stable public <code>BaseUrl</code>, no
+    production default RPC URL ships with this node. An RPC endpoint is deployment-specific infrastructure
+    (often a paid, rate-limited allocation) that must never be hardcoded as a source default. You must supply
+    your own <code>NetworkRpcUrls</code> entry for any network you call <code>isChainSupported</code> or
+    <code>getFee</code> against — see <a href="09-troubleshooting.html">Troubleshooting</a> for what happens
+    when one is missing.
+  </div>
+
+  <h2>Optional CCIP API Key</h2>
+  <p>The CCIP API v2 works <strong>unauthenticated</strong> for the vast majority of its surface — every
+  operation this node implements works with no API key at all. An API key is only needed for one gated CCIP API
+  feature (an intents/quote endpoint this node doesn't implement), and it also raises rate-limit headroom on the
+  public endpoints this node does call.</p>
+  <p>When present, attach the key as this node's credential (an <code>API_KEY</code>-type vault record, the same
+  shape used across this codebase). The node resolves it once per execution via
+  <code>ReadCredentialRawPrimaryAsync</code> and passes it down as a plain per-call parameter — there is no
+  bespoke credential-resolver service class for this node.</p>
+
+  <h2>Registration</h2>
+  <p><code>ChainlinkDependency.RegisterDefaults(services)</code> registers everything the node needs:</p>
+  <ul>
+    <li>The <code>ChainlinkApiClientOptions</code> options binding (bound lazily to the <code>Chainlink</code> configuration section)</li>
+    <li><code>ChainlinkRateLimitHandler</code> — a Transient <code>DelegatingHandler</code> that retries 429/502/503/504 responses, honoring <code>Retry-After</code></li>
+    <li>The CCIP API v2 HTTP client, the message builder, the on-chain reader, and the 3 resource services (Message, Router, Lane)</li>
+    <li>The executor itself, scoped</li>
+    <li>The <code>ExecutorRegistry</code> entry for <code>chainlink</code></li>
+  </ul>
+
+  <div class="callout info">
+    <strong>Host apps must also add an explicit registration call:</strong> alongside the standard DI
+    registration, a <code>new ChainlinkDependency().RegisterDefaults(services);</code> line must be added to
+    <code>Plugins_RegisterAllNodes()</code> in <code>ServiceCollectionExtensionsForAI.cs</code>, plus a
+    <code>ProjectReference</code> from the hosting project to this executor's csproj. Without both, the node
+    type won't appear in the workflow designer even though the package is referenced — this is the same pattern
+    Binance, Ethereum, HashiCorp, and IPFS all use in that same file.
+  </div>
+
+  <h2>Project Layout</h2>
+  <p>The node ships as three .NET projects (plus a separate <code>Tests</code> project, not part of the shipped package):</p>
+  <table>
+    <thead>
+      <tr><th>Project</th><th>Responsibility</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>BizFirst.Integration.Chainlink.Domain</code></td>
+        <td>Pure result records and shared value types. Zero logic, zero I/O.</td>
+      </tr>
+      <tr>
+        <td><code>BizFirst.Integration.Chainlink.Services</code></td>
+        <td>The CCIP API v2 HTTP client, the EVM2AnyMessage/extraArgs ABI encoder, the minimal independent on-chain reader, and the 3 resource services.</td>
+      </tr>
+      <tr>
+        <td><code>BizFirst.Ai.ExecutionNodes.Blockchain.ChainLink</code></td>
+        <td>The executor: <code>(resource, operation)</code> routing, config parsing, operation-info DTOs.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout info">
+    <strong>Naming note:</strong> the two integration projects use the lowercase spelling
+    <code>Chainlink</code> (<code>BizFirst.Integration.Chainlink.Domain</code>/<code>.Services</code>), while the
+    executor project and this guide's repo use <code>ChainLink</code>. Both spellings refer to the exact same
+    node — this is simply how the three projects were named.
+  </div>
+
+</main>
+</body>
+</html>

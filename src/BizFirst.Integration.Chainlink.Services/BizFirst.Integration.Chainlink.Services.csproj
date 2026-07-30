@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <RootNamespace>BizFirst.Integration.Chainlink.Services</RootNamespace>
+    <AssemblyName>BizFirst.Integration.Chainlink.Services</AssemblyName>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>1591</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.17" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.17" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.17" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.17" />
+    <!-- Used only for the EVM2AnyMessage/extraArgs ABI encoding (ChainlinkMessageBuilder) and the
+         minimal Router on-chain reads (ChainlinkOnChainReader). Same package already used repo-wide
+         by the Ethereum ExecutionNode (BizFirst.Integration.Ethereum.Services) — no new foreign
+         dependency. No ProjectReference to the Ethereum project itself: this node owns its own thin,
+         independent Nethereum usage rather than referencing Ethereum's C# code, per the design's
+         "no cross-integration project reference" rule (00_INDEX.md §7.2/§7.3). -->
+    <PackageReference Include="Nethereum.Web3" Version="6.0.0" />
+  </ItemGroup>
+</Project>
